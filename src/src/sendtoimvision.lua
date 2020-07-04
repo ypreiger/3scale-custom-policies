@@ -2,8 +2,8 @@ local setmetatable = setmetatable
 
 local _M = require('apicast.policy').new('MonitorViaImVision', '0.1')
 local mt = { __index = _M }
-luasocket = require("luasocket")
-http = require("luasocket.http")
+-- yp http = require("socket.http")
+-- yp socket = require("socket")
 
 function _M.new()
   return setmetatable({}, mt)
@@ -12,7 +12,7 @@ end
 function _M:init()
   -- do work when nginx master process starts
   --socket.TIMEOUT = config.timeout
-  luasocket.TIMEOUT = 60
+  --yp socket.TIMEOUT = 60
 end
 
 function _M:init_worker()
@@ -35,8 +35,10 @@ function _M:access()
 
   --ngx.ctx.message_id = math.floor(math.random () * 10000000000000)
 
-  math.randomseed(math.floor(luasocket.gettime() * 100000))
-  ngx.ctx.message_id = math.floor(math.random () * 10000000000000 + luasocket.gettime() * 10000)
+  -- yp math.randomseed(math.floor(socket.gettime() * 100000))
+  -- yp ngx.ctx.message_id = math.floor(math.random () * 10000000000000 + socket.gettime() * 10000)
+  math.randomseed(math.floor(7 * 100000))
+  ngx.ctx.message_id = math.floor(math.random () * 10000000000000 + 7 * 10000)
   --ngx.log(ngx.ERR, "message ID: " .. tostring(ngx.ctx.message_id) .. " time: " .. tostring(socket.gettime()) .. " random: ".. tostring(math.random ()))
 
   -- getting all the request data can be gathered from the 'access' function
