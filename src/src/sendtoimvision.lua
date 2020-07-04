@@ -48,8 +48,8 @@ function _M:access()
   --local query = kong.request.get_raw_query()
   --local headers = kong.request.get_headers()
   --local request_body = kong.request.get_raw_body()
-..
-..local method = ngx.var.aamp_request_method
+
+  local method = ngx.var.aamp_request_method
   local scheme = ngx.var.aamp_scheme
   local host = ngx.var.aamp_server_name
   local port = ngx.var.aamp_server_port
