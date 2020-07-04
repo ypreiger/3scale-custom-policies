@@ -21,13 +21,13 @@
           }
         ]
       }, 
-      { 
+      
         "timeout": 
         {
           "description": "Timeout for imvision AAMP server response in seconds",
           "type": "integer"
         }
-      } 
+
     } 
   } 
 } 
