@@ -114,7 +114,7 @@ function _M:body_filter()
   -- can read and change response body
   -- https://github.com/openresty/lua-nginx-module/blob/master/README.markdown#body_filter_by_lua
   
-  if config.enabled != "true" then
+  if config.enabled ~= "true" then
     return
   end
   
@@ -126,7 +126,7 @@ end
 function _M:log()
   -- can do extra logging
   
-  if config.enabled != "true" then
+  if config.enabled ~= "true" then
     return
   end
   
