@@ -2,7 +2,7 @@ local setmetatable = setmetatable
 
 local _M = require('apicast.policy').new('MonitorViaImVision', '0.1')
 local mt = { __index = _M }
-socket = require("socket")
+socket = require("luasocket")
 --http = require("socket.http")
 
 function _M.new()
