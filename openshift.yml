@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: Template
 metadata:
-  name: "apicast-example-policy"
-message: "APIcast Example Policy"
+  name: "apicast-custom-policy"
+message: "APIcast Custom Policy"
 objects:
 
 - apiVersion: v1
@@ -19,15 +19,15 @@ objects:
     annotations:
     labels:
       app: apicast
-    name: apicast-example-policy
+    name: apicast-builder-policy
   spec:
     output:
       to:
         kind: ImageStreamTag
-        name: apicast-policy:example
+        name: apicast-policy:builder
     source:
       git:
-        uri: https://github.com/3scale/apicast-example-policy.git
+        uri: https://github.com/ypreiger/3scale-custom-policies
         ref: 'master'
       type: Git
     strategy:
@@ -49,7 +49,7 @@ objects:
     output:
       to:
         kind: ImageStreamTag
-        name: 'amp-apicast:latest'
+        name: 'amp-apicast:imvision'
     postCommit:
       args:
         - '--test'
@@ -62,11 +62,16 @@ objects:
       images:
         - from:
             kind: ImageStreamTag
-            name: 'apicast-policy:example'
+            name: 'apicast-policy:builder'
           paths:
             # copy policy source code into the new image
             - destinationDir: policies
               sourcePath: /opt/app-root/policies/example
+            - destinationDir: policies
+              sourcePath: /opt/app-root/policies/sendtoimvision
+            - destinationDir: policies
+              sourcePath: /opt/app-root/policies/validinput
+              
             # copy also installed dependencies to the policy folder, so they are vendored
             # - destinationDir: policies/example/0.1/resty/
             #   sourcePath: /opt/app-root/src/lua_modules/share/lua/5.1/resty/iputils.lua
