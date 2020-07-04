@@ -25,7 +25,7 @@ end
 
 function _M:access()
   -- ability to deny the request before it is sent upstream
-  if config.enabled != "true" then
+  if config.enabled ~= "true" then
     return
   end
   
