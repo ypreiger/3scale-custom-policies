@@ -69,6 +69,7 @@ function _M:access()
     else
       query = query .. key .. "=" .. val
     end
+      end
   end
   --query = cjson.table2json(query)   path.. "?" .. query
   --ngx.log(ngx.ERR, "Can  query ".. tostring(query))
