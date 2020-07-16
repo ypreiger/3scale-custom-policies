@@ -1,0 +1,131 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  annotations:
+    openshift.io/generated-by: OpenShiftNewApp
+  labels:
+    app: 3scale-api-management
+    threescale_component: apicast
+    threescale_component_element: staging
+  name: apicast-staging
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    deploymentConfig: apicast-staging
+  strategy:
+    activeDeadlineSeconds: 21600
+    resources: {}
+    rollingParams:
+      intervalSeconds: 1
+      maxSurge: 25%
+      maxUnavailable: 25%
+      timeoutSeconds: 1800
+      updatePeriodSeconds: 1
+    type: Rolling
+  template:
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftNewApp
+        prometheus.io/port: '9421'
+        prometheus.io/scrape: 'true'
+      creationTimestamp: null
+      labels:
+        app: 3scale-api-management
+        deploymentConfig: apicast-staging
+        threescale_component: apicast
+        threescale_component_element: staging
+    spec:
+      containers:
+        - env:
+            - name: THREESCALE_PORTAL_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  key: PROXY_CONFIGS_ENDPOINT
+                  name: system-master-apicast
+            - name: BACKEND_ENDPOINT_OVERRIDE
+              valueFrom:
+                secretKeyRef:
+                  key: service_endpoint
+                  name: backend-listener
+            - name: APICAST_MANAGEMENT_API
+              valueFrom:
+                configMapKeyRef:
+                  key: APICAST_MANAGEMENT_API
+                  name: apicast-environment
+            - name: OPENSSL_VERIFY
+              valueFrom:
+                configMapKeyRef:
+                  key: OPENSSL_VERIFY
+                  name: apicast-environment
+            - name: APICAST_RESPONSE_CODES
+              valueFrom:
+                configMapKeyRef:
+                  key: APICAST_RESPONSE_CODES
+                  name: apicast-environment
+            - name: APICAST_CONFIGURATION_LOADER
+              value: lazy
+            - name: APICAST_CONFIGURATION_CACHE
+              value: '0'
+            - name: THREESCALE_DEPLOYMENT_ENV
+              value: staging
+            - name: scheme
+              value: jhbqdskjhfqkjdhbfjkasdhbcakjhbsd
+          envFrom:
+            - configMapRef:
+                name: imvision-conf
+          image: >-
+            docker-registry.default.svc:5000/threescale-e5a0/amp-apicast@sha256:eb484c9146b9290900bafb7d9f8c2ee7e30a578e98a3df0ef8ce52636b272a33
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /status/live
+              port: 8090
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: apicast-staging
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 8090
+              protocol: TCP
+            - containerPort: 9421
+              name: metrics
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /status/ready
+              port: 8090
+              scheme: HTTP
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: amp
+      serviceAccountName: amp
+      terminationGracePeriodSeconds: 30
+  test: false
+  triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+          - apicast-staging
+        from:
+          kind: ImageStreamTag
+          name: 'amp-apicast:imvision'
+        lastTriggeredImage: >-
+          docker-registry.default.svc:5000/threescale-e5a0/amp-apicast@sha256:eb484c9146b9290900bafb7d9f8c2ee7e30a578e98a3df0ef8ce52636b272a33
+      type: ImageChange
+    - type: ConfigChange
