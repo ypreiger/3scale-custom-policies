@@ -22,7 +22,10 @@ spec:
   source:
     dockerfile: |
       FROM scratch
-      COPY . src
+      COPY ./src ./src
+      RUN mkdir src/policies
+      COPY ./policies src/policies
+      CMD ./bin/apicast      
     images:
       - as: null
         from:
