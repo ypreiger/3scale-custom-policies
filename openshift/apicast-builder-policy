@@ -1,0 +1,32 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  labels:
+    app: apicast
+  name: apicast-builder-policy
+spec:
+  failedBuildsHistoryLimit: 5
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'apicast-policy:builder'
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    git:
+      ref: master
+      uri: 'https://github.com/yspec/3scale-custom-policies'
+    type: Git
+  strategy:
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: 'amp-apicast:latest'
+        namespace: openshift
+      pullSecret:
+        name: redhat-pull-secret
+    type: Source
+  successfulBuildsHistoryLimit: 5
+  triggers: []
