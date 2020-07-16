@@ -1,0 +1,52 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  labels:
+    app: apicast
+  name: apicast-custom-policies
+spec:
+  failedBuildsHistoryLimit: 5
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'amp-apicast:imvision'
+  postCommit:
+    args:
+      - '--test'
+      - '--lazy'
+    command:
+      - bin/apicast
+  resources: {}
+  runPolicy: Serial
+  source:
+    dockerfile: |
+      FROM scratch
+      COPY . src
+    images:
+      - as: null
+        from:
+          kind: ImageStreamTag
+          name: 'apicast-policy:builder'
+        paths:
+          - destinationDir: policies
+            sourcePath: /opt/app-root/policies/sendtoimvision
+          - destinationDir: src
+            sourcePath: /opt/app-root/src/src/sendtoimvision.lua
+    type: Dockerfile
+  strategy:
+    dockerStrategy:
+      from:
+        kind: ImageStreamTag
+        name: 'amp-apicast:latest'
+        namespace: openshift
+      pullSecret:
+        name: redhat-pull-secret
+    type: Docker
+  successfulBuildsHistoryLimit: 5
+  triggers:
+    - imageChange:
+        lastTriggeredImageID: >-
+          registry.redhat.io/3scale-amp2/apicast-gateway-rhel8@sha256:21be62a6557846337dc0cf764be63442718fab03b95c198a301363886a9e74f9
+      type: ImageChange
+    - type: ConfigChange
