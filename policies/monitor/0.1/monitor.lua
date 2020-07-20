@@ -298,7 +298,7 @@ function get_time()
 --    return = math.floor(package.loaded['socket'].gettime() * 1000)
 --  else
   if ngx then
-    return = ngx.time() * 1000 * 1000
+    return ngx.time() * 1000 * 1000
 
   else
     return os.time() * 1000 * 1000
