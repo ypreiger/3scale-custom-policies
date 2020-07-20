@@ -201,7 +201,7 @@ function send_to_http_imv_server(payload)
     url = imv_http_server_url,
     method = aamp_request_method,
     headers = {
-      ["Accept"] = "application/json"
+      ["Accept"] = "application/json",
       ["Content-Type"] = "application/json",
       ["Content-Length"] = data_json:len()
     },
