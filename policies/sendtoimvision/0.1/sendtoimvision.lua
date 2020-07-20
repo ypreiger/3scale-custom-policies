@@ -1,6 +1,6 @@
 local setmetatable = setmetatable
 
-local _M = require('apicast.policy').new('MonitorViaImVision', '0.1')
+local _M = require('apicast.policy').new('Monitor Via ImVision', '0.1')
 local mt = { __index = _M }
 require("http")
 
