@@ -1,6 +1,6 @@
 { 
   "$schema": "http://apicast.io/policy-v1/schema#manifest#",
-  "name": "Send to imVision",
+  "name": "imVision Monitoring",
   "summary": "Send API data to imvision for montioring.",
   "description": "The policy sends a copy of the API call data to an imVision AAMP collector",
   "version": "0.1",
