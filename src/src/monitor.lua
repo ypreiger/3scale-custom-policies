@@ -2,10 +2,10 @@ local setmetatable = setmetatable
 
 local _M = require('apicast.policy').new('MonitorViaImVision', '0.1')
 local mt = { __index = _M }
-require("http")
+require("resty.resolver.http")
 
 function _M.new()
-  httpc = http.new()
+  httpc = resty.resolver.http.new()
   return setmetatable({}, mt)
 end
 
