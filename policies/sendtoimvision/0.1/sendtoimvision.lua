@@ -12,21 +12,26 @@ function _M.new(config)
   --local config = configuration or {}
   --self.enabled = config.enabled or {}
   self.timeout = config.timeout
-  self.imvurl = config.imvurl
+  self.aamp_endpoint = config.aamp_endpoint
+  -- self.aamp_endpoint = ngx.var.aamp_endpoint
+  self.aamp_request_method = config.aamp_request_method
+  self.aamp_scheme 	 = config.aamp_scheme
+  self.aamp_server_name  = config.aamp_server_name
+  self.aamp_server_port = config.aamp_server_port
   for k, v in pairs(config) do
     ngx.log(ngx.ERR, k)
   end
-  ngx.log(ngx.WARN, "===Yaakov===>>>>> INPUT timout = ", self.timeout)
-  ngx.log(ngx.WARN, "===Yaakov===>>>>> INPUT URL = ", self.imvurl)
-  local ihost = ngx.var.IMV_IHOST
-  ngx.log(ngx.WARN, "===Yaakov===>>>>> ihost = ", ihost)
-  local imethod = ngx.var.IMV_METHOD
-  ngx.log(ngx.WARN, "===Yaakov===>>>>> imethod = ", imethod)
-  local ienv = ngx.var.THREESCALE_DEPLOYMENT_ENV
-  ngx.log(ngx.WARN, "===Yaakov===>>>>> ienv = ", ienv)
-  ngx.log(ngx.WARN, "===Yaakov===>>>>> os.getenv THREESCALE_DEPLOYMENT_ENV = ", os.getenv("THREESCALE_DEPLOYMENT_ENV"))
-  ngx.log(ngx.WARN, "===Yaakov===>>>>> os.getenv APICAST_DIR = ", os.getenv("APICAST_DIR"))
-  ngx.log(ngx.WARN, "===Yaakov===>>>>> os.getenv TZ = ", os.getenv("TZ"))
+  --ngx.log(ngx.WARN, "===Yaakov===>>>>> INPUT timout = ", self.timeout)
+  --ngx.log(ngx.WARN, "===Yaakov===>>>>> INPUT URL = ", self.imvurl)
+  --local ihost = ngx.var.IMV_IHOST
+  --ngx.log(ngx.WARN, "===Yaakov===>>>>> ihost = ", ihost)
+  --local imethod = ngx.var.IMV_METHOD
+  --ngx.log(ngx.WARN, "===Yaakov===>>>>> imethod = ", imethod)
+  --local ienv = ngx.var.THREESCALE_DEPLOYMENT_ENV
+  --ngx.log(ngx.WARN, "===Yaakov===>>>>> ienv = ", ienv)
+  --ngx.log(ngx.WARN, "===Yaakov===>>>>> os.getenv THREESCALE_DEPLOYMENT_ENV = ", os.getenv("THREESCALE_DEPLOYMENT_ENV"))
+  --ngx.log(ngx.WARN, "===Yaakov===>>>>> os.getenv APICAST_DIR = ", os.getenv("APICAST_DIR"))
+  --ngx.log(ngx.WARN, "===Yaakov===>>>>> os.getenv TZ = ", os.getenv("TZ"))
   
 
   --httpc = http.new()
