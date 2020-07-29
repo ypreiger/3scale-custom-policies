@@ -25,6 +25,9 @@ function _M.new(config)
   local ienv = ngx.var.THREESCALE_DEPLOYMENT_ENV
   ngx.log(ngx.WARN, "===Yaakov===>>>>> ienv = ", ienv)
   ngx.log(ngx.WARN, "===Yaakov===>>>>> os.getenv THREESCALE_DEPLOYMENT_ENV = ", os.getenv("THREESCALE_DEPLOYMENT_ENV"))
+  ngx.log(ngx.WARN, "===Yaakov===>>>>> os.getenv APICAST_DIR = ", os.getenv("APICAST_DIR"))
+  ngx.log(ngx.WARN, "===Yaakov===>>>>> os.getenv TZ = ", os.getenv("TZ"))
+  
 
   --httpc = http.new()
   return self
