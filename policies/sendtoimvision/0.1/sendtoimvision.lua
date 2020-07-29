@@ -18,6 +18,14 @@ function _M.new(config)
   end
   ngx.log(ngx.WARN, "===Yaakov===>>>>> INPUT timout = ", self.timeout)
   ngx.log(ngx.WARN, "===Yaakov===>>>>> INPUT URL = ", self.imvurl)
+  local ihost = ngx.var.IMV_IHOST
+  ngx.log(ngx.WARN, "===Yaakov===>>>>> ihost = ", ihost)
+  local imethod = ngx.var.IMV_METHOD
+  ngx.log(ngx.WARN, "===Yaakov===>>>>> imethod = ", imethod)
+  local ienv = ngx.var.THREESCALE_DEPLOYMENT_ENV
+  ngx.log(ngx.WARN, "===Yaakov===>>>>> ienv = ", ienv)
+  ngx.log(ngx.WARN, "===Yaakov===>>>>> os.getenv THREESCALE_DEPLOYMENT_ENV = ", os.getenv("THREESCALE_DEPLOYMENT_ENV"))
+
   --httpc = http.new()
   return self
 end
