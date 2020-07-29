@@ -16,16 +16,7 @@ function _M.new(config)
   for k, v in pairs(config) do
     ngx.log(ngx.ERR, k)
   end
-  if self.timeout ~= nil then
-    ngx.log(ngx.ERR, self.timeout)
-  else
-    ngx.log(ngx.ERR, "timeout is nil")
-  end
-  if self.imvurl ~= nil then
-    ngx.log(ngx.ERR, self.imvurl)
-  else
-    ngx.log(ngx.ERR, "imvurl is nil")
-  end
+  ngx.log(ngx.WARN, "===Yaakov===>>>>> INPUT timout = ", self.timeout)
   ngx.log(ngx.WARN, "===Yaakov===>>>>> INPUT URL = ", self.imvurl)
   --httpc = http.new()
   return self
