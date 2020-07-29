@@ -7,9 +7,25 @@
   "configuration": {
     "type": "object",
     "properties": {
-      "imvurl": {
+      "aamp_endpoint": {
         "type": "string",
-        "description": "Imvision URL"
+        "description": "Imvision Endpoint"
+      }, 
+      "aamp_request_method": {
+        "type": "string",
+        "description": "Imvision Method"
+      },
+       "aamp_scheme": {
+        "type": "string",
+        "description": "Imvision Scheme"
+      },
+       "aamp_server_name": {
+        "type": "string",
+        "description": "Imvision Server"
+      },
+       "aamp_server_port": {
+        "type": "string",
+        "description": "Imvision Port"
       },
       "timeout": 
       {
