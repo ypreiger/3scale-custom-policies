@@ -2,11 +2,33 @@ local setmetatable = setmetatable
 
 local _M = require('apicast.policy').new('MonitorViaImVision', '0.1')
 local mt = { __index = _M }
-require("resty.resolver.http")
+http = require("resty.resolver.http")
+cjson = require 'cjson'
+resty_env = require 'resty.env'
 
-function _M.new()
-  httpc = resty.resolver.http.new()
-  return setmetatable({}, mt)
+function _M.new(config)
+  --ngx.log(ngx.ERR, "running new")
+  local self = setmetatable({}, mt)
+  --local config = configuration or {}
+  --self.enabled = config.enabled or {}
+  self.timeout = config.timeout
+  self.imvurl = config.imvurl
+  for k, v in pairs(config) do
+    ngx.log(ngx.ERR, k)
+  end
+  if self.timeout ~= nil then
+    ngx.log(ngx.ERR, self.timeout)
+  else
+    ngx.log(ngx.ERR, "timeout is nil")
+  end
+  if self.imvurl ~= nil then
+    ngx.log(ngx.ERR, self.imvurl)
+  else
+    ngx.log(ngx.ERR, "imvurl is nil")
+  end
+  ngx.log(ngx.WARN, "===Yaakov===>>>>> INPUT URL = ", self.imvurl)
+  --httpc = http.new()
+  return self
 end
 
 function _M:init()
@@ -23,9 +45,14 @@ end
 
 function _M:access()
   -- ability to deny the request before it is sent upstream
-  if config.enabled ~= "true" then
-    return
-  end
+  --ngx.log(ngx.ERR, "running access")
+  --for k, v in pairs(resty_env.list()) do
+  --  ngx.log(ngx.ERR, k .. ": " .. v)
+  --end
+  --if ngx.ctx.enabled ~= "true" then
+  --  ngx.log(ngx.ERR, "config.enabled (" .. ngx.ctx.enabled .. ") != true!")
+  --  return
+  --end
   
   ngx.ctx.client = nil
   ngx.ctx.message_id = 0
@@ -38,61 +65,35 @@ function _M:access()
   --ngx.log(ngx.ERR, "message ID: " .. tostring(ngx.ctx.message_id) .. " time: " .. tostring(socket.gettime()) .. " random: ".. tostring(math.random ()))
 
   -- getting all the request data can be gathered from the 'access' function
-  --local method = kong.request.get_method()
-  --local scheme = kong.request.get_scheme()
-  --local host = kong.request.get_host()
-  --local port = kong.request.get_port()
-  --local path = kong.request.get_path()
-  --local query = kong.request.get_raw_query()
-  --local headers = kong.request.get_headers()
-  --local request_body = kong.request.get_raw_body()
-  
+
   local method = ngx.var.request_method
   local scheme = ngx.var.scheme
-  local host = ngx.var.server_name
+  local host = ngx.var.host
   local port = ngx.var.server_port
   local path = ngx.var.request_uri
-  
-  local args, err = ngx.req.get_uri_args()
-  if err == "truncated" then
-    -- one can choose to ignore or reject the current request here
-    return
-  end
-  local query = ""
-  for key, val in pairs(args) do
-    if len(query)>0 then
-      query = query .. "&"
-    end
-    if type(val) == "table" then
-      query = query .. key .. "=" .. table.concat(val, "&" .. key .. "=")
-    else
-      query = query .. key .. "=" .. val
-    end
-  end
-  --query = cjson.table2json(query)   path.. "?" .. query
-  --ngx.log(ngx.ERR, "Can  query ".. tostring(query))
+
   local headers = ngx.req.get_headers()
   ngx.req.read_body()
   local request_body = ngx.req.get_body_data()
 
-  local url = scheme .. "://" .. host .. ":" .. port .. "/" .. path .. "?" .. query
-  local headers_json = "["
+  local url = scheme .. "://" .. host .. ":" .. port .. path -- .. query
+  local headers_dict = {}
+  local i = 1
   for k,v in pairs(headers) do
-    if first == true then
-      first = false
-    else
-      headers_json = headers_json .. ","
-    end
-    headers_json = headers_json .. "{\"name\": " .. k .. ", \"value\": " .. v .. "}"
+    headers_dict[i] = {
+      name = k,
+      value = v
+    }
+    i = i+1
   end
-  headers_json = headers_json .. "]"
+  local headers_json = cjson.encode(headers_dict)
 
   local full_body = ""
   if (request_body ~= nil and request_body ~= '') then
     full_body = request_body
   end
   
-  send_request_info_to_imv_server(method, url, headers_json, full_body, ngx.ctx.message_id)
+  send_request_info_to_imv_server(method, url, headers_dict, full_body, ngx.ctx.message_id)
   --send_to_tcp_imv_server(conf, full_request, 0, ngx.ctx.message_id)
 end
 
@@ -112,21 +113,27 @@ function _M:body_filter()
   -- can read and change response body
   -- https://github.com/openresty/lua-nginx-module/blob/master/README.markdown#body_filter_by_lua
   
-  if config.enabled ~= "true" then
-    return
-  end
+  --if ngx.ctx.enabled ~= "true" then
+  --  return
+  --end
   
   -- getting pieces of the response_body from 'body_filter' function, concatenating them together
   local chunk = ngx.arg[1]
-  ngx.ctx.response_body = ngx.ctx.response_body .. (chunk or "")
+  if (ngx.ctx.response_body ~= nil and ngx.ctx.response_body ~= '') then
+    ngx.ctx.response_body = ngx.ctx.response_body .. (chunk or "")
+  else
+    ngx.ctx.response_body = (chunk or "")
+    --ngx.log(ngx.ERR,"no ctx.response_body in body_filter, only writing chunk:" .. ngx.ctx.response_body)
+  end
 end
 
 function _M:log()
   -- can do extra logging
-  
-  if config.enabled ~= "true" then
-    return
-  end
+  ngx.log(ngx.ERR, "running log")
+
+  --if ngx.ctx.enabled ~= "true" then
+  --  return
+  --end
   
   -- getting the response data from 'log', saving everything and sending to imv server
   local status = ngx.status
@@ -134,29 +141,31 @@ function _M:log()
   local headers = ngx.resp.get_headers()
   --ngx.log(ngx.ERR, "status::: " .. status)
   
-  local is_chunked = false
-  local first = true
-  local headers_json = "["
+  local headers_dict = {}
+  local i = 1
   for k,v in pairs(headers) do
-    if first == true then
-      first = false
-    else
-      headers_json = headers_json .. ","
-    end
-    headers_json = headers_json .. "{\"name\": " .. k .. ", \"value\": " .. v .. "}"
+    headers_dict[i] = {
+      name = k,
+      value = v
+    }
+    i = i+1
   end
-  headers_json = headers_json .. "]"
+  --local headers_json = cjson.encode(headers_dict)
 
   local full_body = ""
   if (ngx.ctx.response_body ~= nil and ngx.ctx.response_body ~= '') then
     full_body = ngx.ctx.response_body
+  else
+    ngx.log(ngx.ERR,"no ctx.response_body in log!")
   end
 
-  if ngx.ctx.message_id == 0 then
-    ngx.log(ngx.ERR, "Got response without request, sending with message id 0")
+  if (ngx.ctx.message_id == 0 or ngx.ctx.message_id == nil) then
+    ngx.log(ngx.ERR, "Got response without request, dropping message!!!")
+    --ngx.ctx.message_id = 0
+    return
   end
 
-  send_response_info_to_imv_server(status, headers_json, full_body, ngx.ctx.message_id)
+  send_response_info_to_imv_server(status, headers_dict, full_body, ngx.ctx.message_id)
   --send_to_tcp_imv_server(conf, full_response, 1, ngx.ctx.message_id)
   --close_tcp_connection()
 end
@@ -166,6 +175,7 @@ function _M:balancer()
 end
 
 function send_request_info_to_imv_server(method, url, req_headers, req_body, message_id)
+  --ngx.log(ngx.ERR, "send_request")
   local body_dict = {}
   body_dict["requestTimestamp"] = get_time()
   body_dict["transactionId"] = message_id
@@ -176,10 +186,12 @@ function send_request_info_to_imv_server(method, url, req_headers, req_body, mes
   
   local body_json = cjson.encode(body_dict)
   
-  send_to_http_imv_server(body_json)
+  ngx.timer.at(0,send_to_http_imv_server, body_json)
+  --send_to_http_imv_server(false, body_json)
 end
 
 function send_response_info_to_imv_server(status_code, res_headers, res_body, message_id)
+  --ngx.log(ngx.ERR, "send_respones")
   local body_dict = {}
   body_dict["responseTimestamp"] = get_time()
   body_dict["transactionId"] = message_id
@@ -188,27 +200,41 @@ function send_response_info_to_imv_server(status_code, res_headers, res_body, me
   body_dict["responseBody"] = res_body
   
   local body_json = cjson.encode(body_dict)
-  
-  send_to_http_imv_server(body_json)
+  --ngx.log(ngx.ERR, "sending response message with body: " .. body_json)
+  ngx.timer.at(0, send_to_http_imv_server,body_json)
+  --send_to_http_imv_server(body_json)
 end
 
-function send_to_http_imv_server(payload)
+function send_to_http_imv_server(premature, payload)
+  --ngx.log(ngx.ERR, "sending...")
+  --ngx.log(ngx.ERR, "payload: " .. payload)
+  --local imv_http_server_url = resty_env.get("aamp_scheme") .. "://".. resty_env.get("aamp_server_name") .. ":" .. resty_env.get("aamp_server_port") .."/" .. resty_env.get("aamp_endpoint")
+  local imv_http_server_url = "http://100.25.160.207:5601/data"--.. resty_env.get("aamp_server_name") .. ":" .. resty_env.get("aamp_server_port") .."/" .. resty_env.get("aamp_endpoint")
 
-  local imv_http_server_url = aamp_scheme .. "://".. aamp_server_name .. ":" .. aamp_server_port .."/" .. aamp_endpoint
-
-  local imv_body = { }
-  local res, code, response_headers, status = httpc.request {
+  local timeout = 10000
+  --if self.timeout then
+  --  timeout = self.timeout
+  --end
+  --ngx.log(ngx.ERR, "sending " .. payload:len() .. " to POST " .. imv_http_server_url)
+  local lhttpc = http.new()
+  lhttpc:set_timeouts(timeout, timeout, timeout)
+  lhttpc:request_uri(imv_http_server_url,{
     url = imv_http_server_url,
-    method = aamp_request_method,
+    method = "POST", --aamp_request_method,
     headers = {
       ["Accept"] = "application/json",
       ["Content-Type"] = "application/json",
-      ["Content-Length"] = data_json:len()
+      ["Content-Length"] = payload:len()
     },
-    body = payload
+    body = payload,
     --body = source = ltn12.source.string(payload),
     --sink = ltn12.sink.table(imv_body)
-  }
+    keepalive = false
+  })
+  --ngx.log(ngx.ERR,"os.getenv: " .. os.getenv("aamp_scheme") .. "://".. os.getenv("aamp_server_name") .. ":" .. os.getenv("aamp_server_port") .."/" .. os.getenv("aamp_endpoint"))
+  --ngx.log(ngx.ERR,"resty_env.get: " .. resty_env.get("aamp_scheme") .. "://".. resty_env.get("aamp_server_name") .. ":" .. resty_env.get("aamp_server_port") .."/" .. resty_env.get("aamp_endpoint"))
+  --ngx.log(ngx.ERR,"resty_env.value: " .. resty_env.value("aamp_scheme") .. "://".. resty_env.value("aamp_server_name") .. ":" .. resty_env.value("aamp_server_port") .."/" .. resty_env.value("aamp_endpoint"))
+  --ngx.log(ngx.ERR,"res: " .. res)-- .. ". code: " .. code)
   --ngx.log(ngx.NOTICE, "version: "..tostring(version)..", ts: "..tostring(ts)..", opcode: "..tostring(opcode)..", len: "..tostring(payload:len())..", message_id: "..tostring(message_id))
 end
 
@@ -272,24 +298,22 @@ end
 --    return res
 --end
 
-function _M.seed()
-  if seed then
-    math.randomseed(seed)
-    return math.randomseed(seed)
-  end
+function seed()
 --  if package.loaded['socket'] and package.loaded['socket'].gettime then
 --    seed = math.floor(package.loaded['socket'].gettime() * 100000)
 --  else
   if ngx then
-    seed = ngx.time() + ngx.worker.pid()
+    --ngx.log(ngx.ERR,"seed is ngx.time()+ngx.worker.pid()")
+    _M.m_seed = ngx.time() + ngx.worker.pid()
 
   else
-    seed = os.time()
+    --ngx.log(ngx.ERR,"seed is os.time")
+    _M.m_seed = os.time()
   end
 
-  math.randomseed(seed)
-
-  return math.randomseed(seed)
+  math.randomseed(_M.m_seed)
+  --ngx.log(ngx.ERR,"seed: " .. _M.m_seed)
+  return _M.m_seed
 end
 
 function get_time()
