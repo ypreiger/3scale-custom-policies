@@ -24,6 +24,7 @@ function _M.new(config)
   ngx.log(ngx.WARN, "======>>>>> self.aamp_server_name = ", self.aamp_server_name)
   self.aamp_server_port = config.aamp_server_port
   ngx.log(ngx.WARN, "======>>>>> self.aamp_server_port = ", self.aamp_server_port)
+  ngx.log(ngx.WARN, "======>>>>> self.imvurl = ", self.imvurl)
 
   for k, v in pairs(config) do
     ngx.log(ngx.ERR, k)
