@@ -1,33 +1,21 @@
-{ 
+{
   "$schema": "http://apicast.io/policy-v1/schema#manifest#",
-  "name": "imVision Monitoring",
+  "name": "Send to imVision",
   "summary": "Send API data to imvision for montioring.",
   "description": "The policy sends a copy of the API call data to an imVision AAMP collector",
   "version": "0.1",
-  "configuration": { 
+  "configuration": {
     "type": "object",
-    "properties": { 
-      "enabled": { 
-        "type": "boolean",
-        "description": "Enable or disable monitoring for this API",
-        "oneOf": [
-          {
-            "enum": ["true"],
-            "description": "monitoring is enabled"
-          },
-          {
-            "enum": ["false"],
-            "description": "monitoring is disabled"
-          }
-        ]
-      }, 
-      
-        "timeout": 
-        {
-          "description": "Timeout for imvision AAMP server response in seconds",
-          "type": "integer"
-        }
-
-    } 
-  } 
-} 
+    "properties": {
+      "imvurl": {
+        "type": "string",
+        "description": "Imvision URL"
+      },
+      "timeout": 
+      {
+        "description": "Timeout for imvision AAMP server response in seconds",
+        "type": "integer"
+      }
+    }
+  }
+}
