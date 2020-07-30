@@ -25,6 +25,10 @@ function _M.new(config)
   self.aamp_server_port = config.aamp_server_port
   ngx.log(ngx.WARN, "======>>>>> self.aamp_server_port = ", self.aamp_server_port)
   ngx.log(ngx.WARN, "======>>>>> self.imvurl = ", self.imvurl)
+  
+  local resty_env = require 'resty.env'
+  ngx.log(ngx.WARN, 'my env THREESCALE_DEPLOYMENT_ENV: ', resty_env.value('THREESCALE_DEPLOYMENT_ENV'))
+  ngx.log(ngx.WARN, 'my env IMV_IHOST: ', resty_env.value('IMV_IHOST'))
 
   for k, v in pairs(config) do
     ngx.log(ngx.ERR, k)
