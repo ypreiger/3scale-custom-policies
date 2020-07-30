@@ -29,6 +29,7 @@ function _M.new(config)
   local resty_env = require 'resty.env'
   ngx.log(ngx.WARN, 'my env THREESCALE_DEPLOYMENT_ENV: ', resty_env.value('THREESCALE_DEPLOYMENT_ENV'))
   ngx.log(ngx.WARN, 'my env IMV_IHOST: ', resty_env.value('IMV_IHOST'))
+  ngx.log(ngx.WARN, 'my env IMV_METHOD: ', resty_env.value('IMV_METHOD'))
 
   for k, v in pairs(config) do
     ngx.log(ngx.ERR, k)
