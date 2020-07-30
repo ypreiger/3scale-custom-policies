@@ -12,24 +12,8 @@ function _M.new(config)
   --local config = configuration or {}
   --self.enabled = config.enabled or {}
   self.timeout = config.timeout
-  ngx.log(ngx.WARN, "======>>>>> self.timeout = ", self.timeout)
-  self.aamp_endpoint = config.aamp_endpoint
-  ngx.log(ngx.WARN, "======>>>>> self.aamp_endpoint = ", self.aamp_endpoint)
-  -- self.aamp_endpoint = ngx.var.aamp_endpoint
-  self.aamp_request_method = config.aamp_request_method
-  ngx.log(ngx.WARN, "======>>>>> self.aamp_request_method = ", self.aamp_request_method)
-  self.aamp_scheme 	 = config.aamp_scheme
-  ngx.log(ngx.WARN, "======>>>>> self.aamp_scheme = ", self.aamp_scheme)
-  self.aamp_server_name  = config.aamp_server_name
-  ngx.log(ngx.WARN, "======>>>>> self.aamp_server_name = ", self.aamp_server_name)
-  self.aamp_server_port = config.aamp_server_port
-  ngx.log(ngx.WARN, "======>>>>> self.aamp_server_port = ", self.aamp_server_port)
-  ngx.log(ngx.WARN, "======>>>>> self.imvurl = ", self.imvurl)
-  
-  local resty_env = require 'resty.env'
-  ngx.log(ngx.WARN, 'my env THREESCALE_DEPLOYMENT_ENV: ', resty_env.value('THREESCALE_DEPLOYMENT_ENV'))
-  ngx.log(ngx.WARN, 'my env APICAST_IMV_IHOST: ', resty_env.value('APICAST_IMV_IHOST'))
-  ngx.log(ngx.WARN, 'my env APICAST_IMV_METHOD: ', resty_env.value('APICAST_IMV_METHOD'))
+  ngx.log(ngx.WARN, 'my env APICAST_aamp_scheme: ', resty_env.value('APICAST_aamp_scheme'))
+  ngx.log(ngx.WARN, 'my env APICAST_AAMP_SCHEME: ', resty_env.value('APICAST_AAMP_SCHEME'))
 
   for k, v in pairs(config) do
     ngx.log(ngx.ERR, k)
