@@ -1,0 +1,54 @@
+curl -k https://<RH-SSO FQDN>/auth/realms/3scale/.well-known/openid-configuration
+
+##### https://medium.com/@tamber/api-management-security-series-3scale-oidc-using-rh-sso-demo-643feb1e1c0d 
+
+# Certificate signed by OCP CA for intra-service communication
+$ oc extract secret/sso-x509-https-secret --keys=tls.crt -n rhsso --to=/tmp
+#same??? curl -v https://<secure-sso-host>/auth/realms/master --cacert customCA.pem
+
+$ cat /tmp/tls.crt
+$ cp /tmp/tls.crt sso-bundle-cert.pem
+# Ingress Router External Cert for RHSSO exposed route access
+$ echo | openssl s_client -showcerts -servername <sso_external_url> -connect <sso_external_url>:443 2>/dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/sso_route_cert.pem
+
+$ cat /tmp/sso_route_cert.pem >> sso-bundle-cert.pem
+# Verify the bundle validity
+$ SSL_CERT_FILE=sso-bundle-cert.pem curl -v https://<SSO_URL>
+
+#option:   cat /tmp/tls1.crt | sed '/-----END CERTIFICATE-----/q' | openssl x509 -subject -issuer -noout
+
+
+------ZYNC-----------
+$ oc get pods -n <3Scale-AMP-NS>
+$ oc exec <zync-pod> cat /etc/pki/tls/cert.pem > zync.pem
+$ cat sso-bundle-cert.pem >> zync.pem
+$ oc create configmap zync-ca-bundle --from-file=./zync.pem
+$ oc set volume dc/zync --add --name=zync-ca-bundle --mount-path /etc/pki/tls/zync/zync.pem --sub-path zync.pem --source='{"configMap":{"name":"zync-ca-bundle","items":[{"key":"zync.pem","path":"zync.pem"}]}}'
+$ oc patch dc/zync --type=json -p '[{"op": "add", "path": "/spec/template/spec/containers/0/volumeMounts/0/subPath", "value":"zync.pem"}]'
+# Wait for pod to redeploy
+$ oc get pods -w
+# verify the new certificate bundle file contains the Keycloak self signed bundle
+$ oc exec <zync-new-pod> cat /etc/pki/tls/zync/zync.pem
+$ oc set env dc/zync SSL_CERT_FILE=/etc/pki/tls/zync/zync.pem
+# Another verification option - my personal favorite
+$ oc rsh <zync-new-pod>
+$ SSL_CERT_FILE=/etc/pki/tls/certs/zync.pem curl -v https://<SSO_URL>
+$ exit
+
+------ZYNC-QUE-----------
+$ oc get pods -n <3Scale-AMP-NS>
+$ oc exec <zync-que-pod> cat /etc/pki/tls/cert.pem > cert.pem
+$ cat sso-bundle-cert.pem >> cert.pem
+$ oc create configmap zync-que-ca-bundle --from-file=./cert.pem
+$ oc set volume dc/zync-que --add --name=zync-que-ca-bundle --mount-path /etc/pki/tls/cert.pem --sub-path cert.pem --source='{"configMap":{"name":"zync-que-ca-bundle","items":[{"key":"cert.pem","path":"cert.pem"}]}}'
+$ oc patch dc/zync-que --type=json -p '[{"op": "add", "path": "/spec/template/spec/containers/0/volumeMounts/0/subPath", "value":"cert.pem"}]'
+# Wait for pod to redeploy
+$ oc get pods -w
+# verify the new certificate bundle file contains the Keycloak self signed bundle
+$ oc exec <zync-que-new-pod> cat /etc/pki/tls/cert.pem
+#??? $ oc set env dc/zync SSL_CERT_FILE=/etc/pki/tls/cert.pem
+
+# Another verification option - my personal favorite
+$ oc rsh <zync-que-new-pod>
+$ SSL_CERT_FILE=/etc/pki/tls/cert.pem curl -v https://<SSO_URL>
+$ exit
